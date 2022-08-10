@@ -142,6 +142,18 @@ router.post("/cerrar", (req, res, next) => {
 });
 
 router.post("/borrar", (req, res, next) => {
+
+  const pedidoId = req.body.values.idPedido;
+
+	var sql =  "DELETE FROM pedido WHERE idPedido = " + pedidoId;
+	db.query(sql, function(err, result) {
+		if (err) {
+			res.status(500).send({ error: "Something failed!" });
+		}
+	});
+});
+
+/*router.post("/borrar", (req, res, next) => {
   const pedidoId = req.body.values.idPedido;
   db.query(
     "UPDATE pedido " +
@@ -169,7 +181,7 @@ router.post("/borrar", (req, res, next) => {
       );
     }
   );
-});
+});*/
 
 router.post("/", (req, res, next) => {
   //Create product
