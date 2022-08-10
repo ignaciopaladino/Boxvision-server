@@ -141,6 +141,36 @@ router.post("/cerrar", (req, res, next) => {
   );
 });
 
+router.post("/borrar", (req, res, next) => {
+  const pedidoId = req.body.values.idPedido;
+  db.query(
+    "UPDATE pedido " +
+      "SET borrado = '1'" +
+      "WHERE idPedido = " +
+      pedidoId,
+    function selectOrden(err, results, fields) {
+      if (err) {
+        console.log("Error: " + err.message);
+        throw err;
+      }
+      db.query(
+        "SELECT pp.idProducto, pp.precio as 'precioOrden',pp.color, p.* FROM `pedido-producto` as pp " +
+          "INNER JOIN product as p ON pp.idProducto = p.id " +
+          "WHERE idPedido = " +
+          pedidoId,
+        function selectOrden(err, results, fields) {
+          if (err) {
+            console.log("Error: " + err.message);
+            throw err;
+          }
+          const response = { data: results };
+          res.status(200).json(response);
+        }
+      );
+    }
+  );
+});
+
 router.post("/", (req, res, next) => {
   //Create product
   const pedido = {
