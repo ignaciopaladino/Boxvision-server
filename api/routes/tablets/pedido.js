@@ -13,11 +13,12 @@ var db = mysql.createConnection({
 
 db.query("USE boxvisio_db_tablets_dev");
 
-router.get("/", (req, res, next) => {
+router.get("/", (req, res, next) => { 
   //Get product list
   db.query(
     "SELECT * FROM pedido " +
-      "INNER JOIN usuarioAfiliado ON pedido.idUsuario = usuarioAfiliado.id ",
+      "INNER JOIN usuarioAfiliado ON pedido.idUsuario = usuarioAfiliado.id " +
+      "WHERE borrado = 0",
     function selectPedidos(err, results, fields) {
       if (err) {
         console.log("Error: " + err.message);
@@ -142,16 +143,35 @@ router.post("/cerrar", (req, res, next) => {
 });
 
 router.post("/borrar", (req, res, next) => {
-
   const pedidoId = req.body.values.idPedido;
-
-	var sql =  "DELETE FROM pedido WHERE idPedido = " + pedidoId;
-	db.query(sql, function(err, result) {
-		if (err) {
-			res.status(500).send({ error: "Something failed!" });
-		}
-	});
+  db.query(
+    "UPDATE pedido " +
+      "SET borrado = '1'" +
+      "WHERE idPedido = " +
+      pedidoId,
+    function selectOrden(err, results, fields) {
+      if (err) {
+        console.log("Error: " + err.message);
+        throw err;
+      }
+      db.query(
+        "SELECT pp.idProducto, pp.precio as 'precioOrden',pp.color, p.* FROM `pedido-producto` as pp " +
+          "INNER JOIN product as p ON pp.idProducto = p.id " +
+          "WHERE idPedido = " +
+          pedidoId,
+        function selectOrden(err, results, fields) {
+          if (err) {
+            console.log("Error: " + err.message);
+            throw err;
+          }
+          const response = { data: results };
+          res.status(200).json(response);
+        }
+      );
+    }
+  );
 });
+
 
 /*router.post("/borrar", (req, res, next) => {
   const pedidoId = req.body.values.idPedido;
